@@ -24,7 +24,7 @@ if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
 const telegraf = new Telegraf(BOT_TOKEN);
 
 telegraf.start((ctx) => {
-  if (ctx.from.username !== TARGET_USERNAME) {
+  if (ctx.from.username !== TARGET_USERNAME && ctx.chat.id !== Number.parseInt(ADMIN_CHAT_ID)) {
     return ctx.reply("Не знаю как вы тут оказались, но этот бот не для вас 😏");
   };
 
