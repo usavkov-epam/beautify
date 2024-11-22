@@ -1,21 +1,21 @@
-// import TelegramBot, { Message } from 'node-telegram-bot-api';
-import { createWorker } from "tesseract.js";
 import dotenv from "dotenv";
 import { Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
+import { createWorker } from "tesseract.js";
+
 import { processImage } from "./utils";
 
-const REGEX = /\bL\.3\.AA\.10\b/gim;
-
 dotenv.config();
+
+const REGEX = /\bL\.3\.AA\.10\b/gim;
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const TELEGRAM_WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL;
+const TARGET_USERNAME = process.env.TARGET_USERNAME;
+const HINT_IMG = process.env.HINT_IMG!;
 
 const isProduction = process.env.NODE_ENV === "production";
-
-const HINT_IMG = "https://i.imgur.com/5EtaZ9S.jpeg";
 
 if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
   throw new Error("Missed TELEGRAM_BOT_TOKEN и ADMIN_CHAT_ID env vars");
@@ -24,7 +24,12 @@ if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
 const telegraf = new Telegraf(BOT_TOKEN);
 
 telegraf.start((ctx) => {
+  if (ctx.from.username !== TARGET_USERNAME) {
+    return ctx.reply("Не знаю как вы тут оказались, но этот бот не для вас 😏");
+  };
+
   ctx.sendPhoto(HINT_IMG);
+  ctx.reply("Привет, котик! Тебе нужно кое-что найти и сфотографировать, чтобы пройти этот квест 😏");
 
   telegraf.telegram.sendMessage(
     ADMIN_CHAT_ID,
@@ -63,7 +68,7 @@ telegraf.on(message("photo"), async (ctx) => {
 
     if (REGEX.test(data.text)) {
       ctx.reply(
-        "🎉 Поздравляю! Ты нашла что-то интересное! 🎉\nПодожди 10 секунд и посмотри что там 😘"
+        "🎉 Поздравляю! Ты нашла что-то интересное! 🎉\nПодожди 20 секунд и посмотри что там 😘"
       );
       sendAlert(true);
     } else {
@@ -93,63 +98,19 @@ function alertAdmin(
   );
 }
 
-telegraf
-  .launch(
-    isProduction
-      ? {
-          webhook: {
-            domain: TELEGRAM_WEBHOOK_URL!,
-            port: parseInt(process.env.PORT || "3000"),
-          },
-        }
-      : {}
-  )
-  .then(() => {
-    console.log("Bot started...");
-  });
-//   const chatId = msg.chat.id;
-
-//   if (!msg.photo) {
-//     bot.sendMessage(chatId, 'Хмм... что-то не то, мне нужно фото! Попробуй еще раз :)');
-//     return;
-//   }
-
-//   const fileId = msg.photo[msg.photo.length - 1].file_id; // Best quality photo
-
-//   const worker = await createWorker('eng+rus');
-
-//   try {
-//     const file = await bot.getFile(fileId);
-//     const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${file.file_path}`;
-
-//     const preparedImage = await processImage(fileUrl);
-
-//     console.log('preparedImage', preparedImage);
-
-//     const { data } = await worker.recognize(preparedImage);
-
-//     const sendAlert = alertAdmin.bind(null, fileUrl, data.text, msg.from?.username ?? 'неизвестно');
-
-//     bot.sendPhoto(ADMIN_CHAT_ID, preparedImage);
-
-//     if (REGEX.test(data.text)) {
-//       bot.sendMessage(
-//         chatId,
-//         '🎉 Поздравляю! Ты нашла что-то интересное! 🎉\nПодожди 10 секунд и посмотри что там 😘',
-//       );
-//       sendAlert(true);
-//     } else {
-//       bot.sendMessage(chatId, 'Хмм... кажется это что-то другое. Попробуй еще раз :)');
-//       sendAlert(false);
-//     }
-//     bot.sendPhoto(ADMIN_CHAT_ID, preparedImage)
-//   } catch (error) {
-//     console.log('error', error);
-//     bot.sendMessage(chatId, 'Упс :(\nЧто-то пошло не так...');
-//   } finally {
-//     await worker.terminate();
-//   }
-// });
+telegraf.launch(
+  isProduction
+    ? {
+        webhook: {
+          domain: TELEGRAM_WEBHOOK_URL!,
+          port: parseInt(process.env.PORT || "3000"),
+        },
+      }
+    : {}
+)
+.then(() => {
+  console.log("Bot started...");
+});
 
 process.once("SIGINT", () => telegraf.stop("SIGINT"));
 process.once("SIGTERM", () => telegraf.stop("SIGTERM"));
