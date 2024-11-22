@@ -22,13 +22,6 @@ if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
 
 const telegraf = new Telegraf(BOT_TOKEN);
 
-telegraf.launch({
-  webhook: {
-    domain: TELEGRAM_WEBHOOK_URL!,
-    port: parseInt(process.env.PORT || '3000'),
-  },
-});
-
 telegraf.start((ctx) => {
   ctx.reply(`Добро пожаловать, ${ctx.from?.username || 'гость'}! 😊`);
   telegraf.telegram.sendMessage(ADMIN_CHAT_ID, `❗Начинаем ❗ (@${ctx.from?.username ?? 'неизвестно'})`);
@@ -38,7 +31,15 @@ telegraf.on(message('text'), (ctx) => {
   ctx.reply('Я могу обрабатывать только команды или картинки. Попробуй команду /start!');
 });
 
-console.log('Bot started...');
+telegraf.launch({
+  webhook: {
+    domain: TELEGRAM_WEBHOOK_URL!,
+    port: parseInt(process.env.PORT || '3000'),
+  },
+}).then(() => {
+  console.log('Bot started...');
+});
+
 
 // const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
