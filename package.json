@@ -1,0 +1,25 @@
+{
+  "name": "beautify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.ts",
+  "scripts": {
+    "dev": "nodemon --exec ts-node src/main.ts",
+    "heroku-postbuild": "tsc",
+    "start": "node dist/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Yury Saukou <yury.saukou@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "sharp": "^0.33.5",
+    "telegraf": "^4.16.3",
+    "tesseract.js": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "nodemon": "^3.1.7",
+    "typescript": "^5.7.2"
+  }
+}
