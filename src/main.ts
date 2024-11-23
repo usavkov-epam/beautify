@@ -3,6 +3,7 @@ import { Telegraf } from "telegraf";
 import { message } from "telegraf/filters";
 import { createWorker } from "tesseract.js";
 
+import hints from './hints';
 import { processImage } from "./utils";
 
 dotenv.config();
@@ -42,10 +43,22 @@ telegraf.start((ctx) => {
   );
 });
 
+telegraf.command('hint', (ctx) => {
+  const randomIndex = Math.floor(Math.random() * hints.length);
+  const hint = hints.at(randomIndex);
+  
+  if (hint?.imageURL) {
+    ctx.sendPhoto(hint.imageURL);
+  }
+  ctx.reply(hint!.text);
+
+  telegraf.telegram.sendMessage(ADMIN_CHAT_ID, `Использована подсказка (@${ctx.from?.username ?? "неизвестно"}):\n"${hint}"`);
+});
+
 telegraf.on(message("text"), (ctx) => {
   telegraf.telegram.sendMessage(
     ADMIN_CHAT_ID,
-    ` ❗Сообщение от (@${ctx.from?.username ?? "неизвестно"}):\n${ctx.message.text}`
+    `❗Сообщение от (@${ctx.from?.username ?? "неизвестно"}):\n${ctx.message.text}`
   );
   ctx.reply(
     "Я могу обрабатывать только команды или картинки. Попробуй команду /start!"
