@@ -14,6 +14,7 @@ const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const TELEGRAM_WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL;
 const TARGET_USERNAME = process.env.TARGET_USERNAME;
 const HINT_IMG = process.env.HINT_IMG!;
+const PREVENT_FOREIGNERS = process.env.PREVENT_FOREIGNERS || '1';
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -24,7 +25,11 @@ if (!BOT_TOKEN || !ADMIN_CHAT_ID) {
 const telegraf = new Telegraf(BOT_TOKEN);
 
 telegraf.start((ctx) => {
-  if (ctx.from.username !== TARGET_USERNAME && ctx.chat.id !== Number.parseInt(ADMIN_CHAT_ID)) {
+  if (
+    Number.parseInt(PREVENT_FOREIGNERS) > 0
+    && ctx.from.username !== TARGET_USERNAME
+    && ctx.chat.id !== Number.parseInt(ADMIN_CHAT_ID)
+  ) {
     return ctx.reply("Не знаю как вы тут оказались, но этот бот не для вас 😏");
   };
 
