@@ -52,7 +52,7 @@ telegraf.command('hint', (ctx) => {
   }
   ctx.reply(hint!.text);
 
-  telegraf.telegram.sendMessage(ADMIN_CHAT_ID, `Использована подсказка (@${ctx.from?.username ?? "неизвестно"}):\n"${hint}"`);
+  telegraf.telegram.sendMessage(ADMIN_CHAT_ID, `Использована подсказка (@${ctx.from?.username ?? "неизвестно"}):\n"${hint!.text}"`);
 });
 
 telegraf.on(message("text"), (ctx) => {
