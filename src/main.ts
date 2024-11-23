@@ -43,6 +43,10 @@ telegraf.start((ctx) => {
 });
 
 telegraf.on(message("text"), (ctx) => {
+  telegraf.telegram.sendMessage(
+    ADMIN_CHAT_ID,
+    ` ❗Сообщение от (@${ctx.from?.username ?? "неизвестно"}):\n${ctx.message.text}`
+  );
   ctx.reply(
     "Я могу обрабатывать только команды или картинки. Попробуй команду /start!"
   );
@@ -100,7 +104,7 @@ function alertAdmin(
     ADMIN_CHAT_ID!,
     `${
       isRecognized ? "✔️" : "❌"
-    } Обнаружен текст: "${text}"\nТаргет: ${REGEX}\nФото от пользователя: ${from}`
+    } Обнаружен текст: "${text}"\nТаргет: ${REGEX}\nФото от пользователя: @${from}`
   );
 }
 
