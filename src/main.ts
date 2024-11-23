@@ -7,7 +7,7 @@ import { processImage } from "./utils";
 
 dotenv.config();
 
-const REGEX = /\bL\.3\.AA\.10\b/gim;
+const REGEX = /\bL\.?3\.?AA\.?10\b/gim
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
@@ -44,7 +44,7 @@ telegraf.on(message("text"), (ctx) => {
 });
 
 telegraf.on(message("photo"), async (ctx) => {
-  const worker = await createWorker("eng+rus");
+  const worker = await createWorker("eng");
 
   try {
     const photo = ctx.message.photo;
@@ -53,7 +53,8 @@ telegraf.on(message("photo"), async (ctx) => {
 
     ctx.reply("Фото получено, начинается обработка...");
 
-    const preparedImage = await processImage(fileUrl.toString());
+    const fileBuffer = Buffer.from(await fetch(fileUrl.toString()).then((res) => res.arrayBuffer()));
+    const preparedImage = await processImage(fileBuffer);
 
     const { data } = await worker.recognize(preparedImage);
 
@@ -64,7 +65,7 @@ telegraf.on(message("photo"), async (ctx) => {
       ctx.from.username ?? "неизвестно"
     );
 
-    // telegraf.telegram.sendPhoto(ADMIN_CHAT_ID, preparedImage);
+    telegraf.telegram.sendPhoto(ADMIN_CHAT_ID, { source: preparedImage });
 
     if (REGEX.test(data.text)) {
       ctx.reply(
@@ -72,7 +73,7 @@ telegraf.on(message("photo"), async (ctx) => {
       );
       sendAlert(true);
     } else {
-      ctx.reply("Хмм... кажется это что-то другое. Попробуй еще раз :)");
+      ctx.reply("Хмм... кажется это что-то другое. Попробуй отойти чуть дальше и сфотографировать еще раз.\nУбедись, что хватает света :)");
       sendAlert(false);
     }
   } catch (error) {
